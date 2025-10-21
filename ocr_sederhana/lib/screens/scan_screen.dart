@@ -42,15 +42,18 @@ class _ScanScreenState extends State<ScanScreen> {
       _initializeControllerFuture = _controller!.initialize();
       await _initializeControllerFuture;
 
-      if (mounted) setState(() {});
-      debugPrint("✅ Kamera berhasil diinisialisasi");
+if (!mounted) return;
+setState(() {});
+
     } catch (e) {
-      debugPrint("❌ Gagal inisialisasi kamera: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal inisialisasi kamera: $e')),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Pemindaian Gagal! Periksa Izin Kamera atau coba lagi.',
+          ),
+        ),
+      );
     }
   }
 
@@ -113,11 +116,22 @@ class _ScanScreenState extends State<ScanScreen> {
       future: _initializeControllerFuture,
       builder: (context, snapshot) {
         // 🔹 Kondisi kamera belum siap
-        if (snapshot.connectionState != ConnectionState.done ||
-            _controller == null ||
-            !_controller!.value.isInitialized) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+        if (_controller == null || !_controller!.value.isInitialized) {
+          return Scaffold(
+            backgroundColor: Colors.grey[900],
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  CircularProgressIndicator(color: Colors.yellow),
+                  SizedBox(height: 16),
+                  Text(
+                    'Memuat Kamera... Harap tunggu.',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                ],
+              ),
+            ),
           );
         }
 
