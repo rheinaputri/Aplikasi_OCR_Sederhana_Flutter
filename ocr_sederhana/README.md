@@ -1,16 +1,45 @@
-# ocr_sederhana
+UJIAN TENGAH SEMESTER (UTS) - PRAKTIKUM
 
-A new Flutter project.
+Mata Kuliah: Pemrograman Mobile - Aplikasi OCR Semester: Ganjil Tahun Akademik: 2025/2026
 
-## Getting Started
+## Instruksi Awal (SETUP) - Wajib
+1.	Pastikan proyek ocr_sederhana sudah diinisialisasi sebagai repositori Git dan ter- hubung ke akun GitHub Anda.
+Github :  https://github.com/rheinaputri/Aplikasi_OCR_Sederhana_Flutter.git
 
-This project is a starting point for a Flutter application.
+2.	Lakukan commit awal untuk memastikan branch main Anda bersih.
+![Tampilan Screenshoot](img/image1.png)
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Soal 1: Modifikasi Struktur Navigasi dan Aliran
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+**1. Pengubahan Navigasi Home**
+
+
+**2. Teks Utuh dan Navigasi Balik**
+
+Hasil : 
+![Tampilan Screenshoot](img/image2.png)
+
+## Soal 2: Penyesuaian Tampilan dan Penanganan State/Error
+
+**1. Custom Loading Screen di ScanScreen**
+
+Hasil : ![Tampilan Screenshoot](img/soal2.1.jpg)
+
+**2. Spesifikasi Pesan Error**
+
+Hasil : ![Tampilan Screenshoot](img/soal2.2.jpg)
+
+
+## Implementasi Plugin Text-to-Speech (TTS)
+**1. Instalasi Plugin**
+**2. Konversi Widget dan Inisialisasi**
+**3. Fungsionalitas Pembacaan**
+
+Hasil :
+https://drive.google.com/file/d/1cGy9StUBJuKTP8SxzUKrM68dsN0Q2_Dx/view?usp=sharing
+
+
+
+
+
