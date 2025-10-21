@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'result_screen.dart';
 
 late List<CameraDescription> cameras;
@@ -25,6 +25,7 @@ class _ScanScreenState extends State<ScanScreen> {
     _initCamera();
   }
 
+  // Inisialisasi kamera
   void _initCamera() async {
     cameras = await availableCameras();
     _controller = CameraController(cameras[0], ResolutionPreset.medium);
@@ -40,6 +41,7 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
+  // Fungsi OCR dari file gambar
   Future<String> _ocrFromFile(File imageFile) async {
     final inputImage = InputImage.fromFile(imageFile);
     final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
@@ -50,12 +52,12 @@ class _ScanScreenState extends State<ScanScreen> {
     return recognizedText.text;
   }
 
+  // Ambil gambar dan proses OCR
   Future<void> _takePicture() async {
     try {
       await _initializeControllerFuture;
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Memproses OCR, mohon tunggu...'),
@@ -67,7 +69,6 @@ class _ScanScreenState extends State<ScanScreen> {
       final ocrText = await _ocrFromFile(File(image.path));
 
       if (!mounted) return;
-
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => ResultScreen(ocrText: ocrText)),
@@ -75,7 +76,7 @@ class _ScanScreenState extends State<ScanScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saat mengambil/memproses foto: $e')),
+        SnackBar(content: Text('Error saat mengambil / memproses foto: $e')),
       );
     }
   }
