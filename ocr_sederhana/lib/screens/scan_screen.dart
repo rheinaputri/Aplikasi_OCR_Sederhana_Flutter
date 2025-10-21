@@ -16,46 +16,73 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
+  CameraController? _controller;
+  Future<void>? _initializeControllerFuture;
 
   @override
   void initState() {
     super.initState();
-    _initCamera();
+    _initializeCamera();
   }
 
-  // Inisialisasi kamera
-  void _initCamera() async {
-    cameras = await availableCameras();
-    _controller = CameraController(cameras[0], ResolutionPreset.medium);
-    _initializeControllerFuture = _controller.initialize();
-    if (mounted) {
-      setState(() {});
+  // 🔹 Inisialisasi kamera
+  Future<void> _initializeCamera() async {
+    try {
+      cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        throw Exception("Tidak ada kamera yang tersedia");
+      }
+
+      _controller = CameraController(
+        cameras.first,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+
+      _initializeControllerFuture = _controller!.initialize();
+      await _initializeControllerFuture;
+
+      if (mounted) setState(() {});
+      debugPrint("✅ Kamera berhasil diinisialisasi");
+    } catch (e) {
+      debugPrint("❌ Gagal inisialisasi kamera: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal inisialisasi kamera: $e')),
+        );
+      }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
-  // Fungsi OCR dari file gambar
+  // 🔹 OCR dari file gambar
   Future<String> _ocrFromFile(File imageFile) async {
     final inputImage = InputImage.fromFile(imageFile);
     final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-    final RecognizedText recognizedText = await textRecognizer.processImage(
-      inputImage,
-    );
-    textRecognizer.close();
+    final recognizedText = await textRecognizer.processImage(inputImage);
+    await textRecognizer.close();
     return recognizedText.text;
   }
 
-  // Ambil gambar dan proses OCR
+  // 🔹 Ambil gambar dan proses OCR
   Future<void> _takePicture() async {
     try {
-      await _initializeControllerFuture;
+      if (_initializeControllerFuture == null) {
+        throw Exception('Kamera belum mulai diinisialisasi');
+      }
+
+      await _initializeControllerFuture!;
+
+      if (_controller == null || !_controller!.value.isInitialized) {
+        throw Exception('Kamera belum siap');
+      }
+
+      final XFile image = await _controller!.takePicture();
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -65,7 +92,6 @@ class _ScanScreenState extends State<ScanScreen> {
         ),
       );
 
-      final XFile image = await _controller.takePicture();
       final ocrText = await _ocrFromFile(File(image.path));
 
       if (!mounted) return;
@@ -76,37 +102,48 @@ class _ScanScreenState extends State<ScanScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saat mengambil / memproses foto: $e')),
+        SnackBar(content: Text('Error saat mengambil atau memproses foto: $e')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_controller.value.isInitialized) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    return FutureBuilder(
+      future: _initializeControllerFuture,
+      builder: (context, snapshot) {
+        // 🔹 Kondisi kamera belum siap
+        if (snapshot.connectionState != ConnectionState.done ||
+            _controller == null ||
+            !_controller!.value.isInitialized) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Kamera OCR')),
-      body: Column(
-        children: [
-          Expanded(
-            child: AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
-              child: CameraPreview(_controller),
-            ),
+        // 🔹 Jika kamera sudah siap
+        return Scaffold(
+          appBar: AppBar(title: const Text('Kamera OCR')),
+          body: Column(
+            children: [
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: _controller!.value.aspectRatio,
+                  child: CameraPreview(_controller!),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton.icon(
+                  onPressed: _takePicture,
+                  icon: const Icon(Icons.camera),
+                  label: const Text('Ambil Foto & Scan'),
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton.icon(
-              onPressed: _takePicture,
-              icon: const Icon(Icons.camera),
-              label: const Text('Ambil Foto & Scan'),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
